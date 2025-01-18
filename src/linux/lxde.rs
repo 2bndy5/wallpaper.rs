@@ -13,7 +13,7 @@ pub fn get() -> Result<String> {
         .section(Some("*"))
         .and_then(|ini| ini.get("wallpaper"))
         .ok_or(Error::NoImage("LXDE"))?
-        .clone())
+        .to_owned())
 }
 
 pub fn set<P>(path: P) -> Result<()>
