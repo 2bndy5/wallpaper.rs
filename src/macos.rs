@@ -1,5 +1,3 @@
-use std::path::Path;
-
 use crate::{error::Error, get_stdout, run, Mode, Result};
 
 #[cfg(feature = "from_url")]
