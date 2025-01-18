@@ -11,9 +11,11 @@ pub enum Error {
     InvalidUtf8(#[from] FromUtf8Error),
 
     #[error("Invalid INI: {0}")]
+    #[cfg(all(unix, not(target_os = "macos")))]
     InvalidIni(#[from] ini::ini::Error),
 
     #[error("Enquote error: {0}")]
+    #[cfg(unix)]
     Enquote(#[from] enquote::Error),
 
     #[error("{command} exited with status code {code}")]

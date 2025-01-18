@@ -1,4 +1,4 @@
-use crate::{Mode, Result};
+use crate::{error, Mode, Result};
 use std::ffi::OsStr;
 use std::io;
 use std::iter;
@@ -28,7 +28,8 @@ pub fn get() -> Result<String> {
         ) == 1;
 
         if successful {
-            let path = String::from_utf16(&buffer)?
+            let path = String::from_utf16(&buffer)
+                .map_err(|_| error::Error::InvalidPath)?
                 // removes trailing zeroes from buffer
                 .trim_end_matches('\x00')
                 .into();
