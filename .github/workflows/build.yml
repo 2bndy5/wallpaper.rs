@@ -12,7 +12,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - run: rustup update -no-self-update
+      - run: rustup update --no-self-update
       - run: cargo clippy
       - run: cargo fmt --check
       - run: cargo test
