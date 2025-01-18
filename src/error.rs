@@ -12,7 +12,7 @@ pub enum Error {
 
     #[error("Invalid INI: {0}")]
     #[cfg(all(unix, not(target_os = "macos")))]
-    InvalidIni(#[from] ini::ini::Error),
+    InvalidIni(#[from] ini::Error),
 
     #[error("Enquote error: {0}")]
     #[cfg(unix)]
