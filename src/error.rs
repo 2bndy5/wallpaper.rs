@@ -36,4 +36,8 @@ pub enum Error {
 
     #[error("Invalid path")]
     InvalidPath,
+
+    #[error("Cannot set  wallpaper mode3 on MacOS")]
+    #[cfg(target_os = "macos")]
+    MacOsUnsupportedMode,
 }

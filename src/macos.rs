@@ -1,4 +1,6 @@
-use crate::{get_stdout, run, Mode, Result};
+use std::path::Path;
+
+use crate::{error::Error, get_stdout, run, Mode, Result};
 
 #[cfg(feature = "from_url")]
 use crate::download_image;
@@ -15,18 +17,16 @@ pub fn get() -> Result<String> {
 }
 
 // Sets the wallpaper from a file.
-pub fn set_from_path<P>(path: P) -> Result<()>
-where
-    P: AsRef<Path> + std::fmt::Display,
-{
+pub fn set_from_path(path: &str) -> Result<()> {
     run(
         "osascript",
         &[
             "-e",
-            &format!(
+            format!(
                 r#"tell application "System Events" to tell every desktop to set picture to {}"#,
                 enquote::enquote('"', path),
-            ),
+            )
+            .as_str(),
         ],
     )
 }
@@ -40,5 +40,5 @@ pub fn set_from_url(url: &str) -> Result<()> {
 
 /// No-op. Unable to change with AppleScript.
 pub fn set_mode(_: Mode) -> Result<()> {
-    Err("unsupported on macos".into())
+    Err(Error::MacOsUnsupportedMode)
 }
