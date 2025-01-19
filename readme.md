@@ -34,25 +34,3 @@ fn main() {
     println!("{:?}", wallpaper::get());
 }
 ```
-
-If you want to set an image as background via an URL, make sure you activated the `from_url` feature of the wallpaper crate on Cargo.toml:
-
-```toml
-[dependencies]
-wallpaper = { version = "3", features = ["from_url"] }
-```
-
-Then, on your main.rs:
-
-```rust
-use wallpaper;
-
-fn main() {
-    // Returns the wallpaper of the current desktop.
-    println!("{:?}", wallpaper::get());
-    // Sets the wallpaper for the current desktop from a URL.
-    wallpaper::set_from_url("https://source.unsplash.com/random").unwrap();
-    // Returns the wallpaper of the current desktop.
-    println!("{:?}", wallpaper::get());
-}
-```
