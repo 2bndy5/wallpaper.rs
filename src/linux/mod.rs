@@ -6,9 +6,6 @@ pub(crate) mod xfce;
 use crate::{get_stdout, run, Error, Mode, Result};
 use std::{env, path::Path, process::Command};
 
-#[cfg(feature = "from_url")]
-use crate::download_image;
-
 /// Returns the wallpaper of the current desktop.
 pub fn get() -> Result<String> {
     let desktop = env::var("XDG_CURRENT_DESKTOP").unwrap_or_default();
@@ -98,13 +95,6 @@ where
             )
         }
     }
-}
-
-#[cfg(feature = "from_url")]
-/// Sets the wallpaper for the current desktop from a URL.
-pub fn set_from_url(url: &str) -> Result<()> {
-    let path = download_image(url)?;
-    set_from_path(&path)
 }
 
 /// Sets the wallpaper style.

@@ -31,7 +31,7 @@ pub enum Error {
     #[error("No desktops found")]
     XfceNoDesktops,
 
-    #[error("Unsupported Desktop")]
+    #[error("Unsupported Desktop Environment")]
     UnsupportedDesktop,
 
     #[error("Invalid path")]

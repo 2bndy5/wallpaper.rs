@@ -52,13 +52,6 @@ mod unsupported;
 #[cfg(not(any(unix, windows)))]
 pub use unsupported::*;
 
-// from_url feature
-#[cfg(feature = "from_url")]
-mod from_url;
-
-#[cfg(feature = "from_url")]
-pub(crate) use from_url::download_image;
-
 type Result<T, E = Error> = std::result::Result<T, E>;
 
 #[derive(Clone, Debug)]
