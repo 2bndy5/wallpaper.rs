@@ -1,5 +1,5 @@
 use super::parse_dconf;
-use crate::{run, Mode, Result};
+use crate::{get_stdout, run, Mode, Result};
 
 #[inline]
 pub fn is_compliant(desktop: &str) -> bool {
@@ -18,22 +18,33 @@ where
     P: AsRef<std::path::Path> + std::fmt::Display,
 {
     let uri = enquote::enquote('"', &format!("file://{}", &path));
-    let res = run(
-        "gsettings",
-        &["set", "org.gnome.desktop.background", "picture-uri", &uri],
-    );
     run(
         "gsettings",
+        &["set", "org.gnome.desktop.background", "picture-uri", &uri],
+    )?;
+
+    // Check if a separate dark mode background URI is available and set it too
+    let is_dark_mode_supported = get_stdout(
+        "gsettings",
         &[
-            "set",
+            "writable",
             "org.gnome.desktop.background",
             "picture-uri-dark",
-            &uri,
         ],
-    )
-    // Ignore the result because in Gnome < 42 the cmd could fail since
-    // key "picture-uri-dark" does not exists
-    .or(res)
+    );
+    if is_dark_mode_supported.is_ok_and(|v| v.to_lowercase() == "true") {
+        // In Gnome < 42 this cmd could fail since key "picture-uri-dark" does not exists
+        run(
+            "gsettings",
+            &[
+                "set",
+                "org.gnome.desktop.background",
+                "picture-uri-dark",
+                &uri,
+            ],
+        )?;
+    }
+    Ok(())
 }
 
 pub fn set_mode(mode: Mode) -> Result<()> {
