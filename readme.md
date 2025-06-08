@@ -1,4 +1,4 @@
-# wallpaper [![crate](https://img.shields.io/crates/v/wallpaper.svg)](https://crates.io/crates/wallpaper) [![docs](https://docs.rs/wallpaper/badge.svg)](https://docs.rs/wallpaper)
+# wallpaper
 
 This Rust library gets and sets the desktop wallpaper/background.
 
@@ -21,16 +21,25 @@ The supported desktops are:
 ## Examples
 
 ```rust
-use wallpaper;
+use wallpaper::{DesktopClient, DesktopWallpaper, Mode};
 
 fn main() {
+    // init interface
+    let mut client = DesktopWallpaper::new().unwrap();
+
     // Returns the wallpaper of the current desktop.
-    println!("{:?}", wallpaper::get());
-    // Sets the wallpaper for the current desktop from a file path.
-    wallpaper::set_from_path("/usr/share/backgrounds/gnome/adwaita-day.png").unwrap();
-    // Sets the wallpaper style.
-    wallpaper::set_mode(wallpaper::Mode::Crop).unwrap();
-    // Returns the wallpaper of the current desktop.
-    println!("{:?}", wallpaper::get());
+    println!("{:?}", client.get_wallpaper().unwrap());
+
+    assert!(
+        // Sets the wallpaper for the current desktop from a file path.
+        client.set_wallpaper(
+            "/path/to/picture.png",
+            // Also sets the wallpaper mode (crop, center, fit, span, etc).
+            Mode::Stretch
+        )
+        .is_err_and(|e| matches!(e, wallpaper::Error::InvalidPath))
+    );
+
+    drop(client);
 }
 ```

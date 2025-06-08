@@ -1,28 +1,4 @@
-//! This library gets and sets the desktop wallpaper/background.
-//!
-//! The supported desktops are:
-//! * Windows
-//! * macOS
-//! * GNOME
-//! * KDE
-//! * Cinnamon
-//! * Unity
-//! * Budgie
-//! * XFCE
-//! * LXDE
-//! * MATE
-//! * Deepin
-//! * Most Wayland compositors (set only, requires swaybg)
-//! * i3 (set only, requires feh)
-//!
-//! # Example
-//! ```no_run
-//! println!("{:?}", wallpaper::get());
-//! wallpaper::set_from_path("/usr/share/backgrounds/gnome/adwaita-day.png").unwrap();
-//! wallpaper::set_mode(wallpaper::Mode::Crop).unwrap();
-//! println!("{:?}", wallpaper::get());
-//! ```
-
+#![doc = include_str!("../readme.md")]
 mod error;
 pub use error::Error;
 
