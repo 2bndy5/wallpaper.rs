@@ -1,6 +1,5 @@
 /// Most of this was copied and adjusted from https://github.com/sindresorhus/windows-wallpaper.git.
 /// Anything related to the `winreg` feature was ported from legacy behavior (about changing the Windows Registry).
-
 use std::{ffi::OsString, os::windows::prelude::OsStrExt, path::PathBuf};
 #[cfg(feature = "winreg")]
 use std::{
@@ -61,11 +60,6 @@ pub struct DesktopWallpaper {
     #[cfg(not(feature = "winreg"))]
     interface: ManuallyDrop<IDesktopWallpaper>,
 }
-impl Default for DesktopWallpaper {
-    fn default() -> Self {
-        Self::new().expect("Failed to create a desktop interface in Windows")
-    }
-}
 
 impl DesktopWallpaper {
     pub fn new() -> core::Result<Self> {
@@ -81,7 +75,7 @@ impl DesktopWallpaper {
         })
     }
 
-    /*
+    #[cfg(not(feature = "winreg"))]
     pub fn get_monitors(&self) -> core::Result<Vec<Monitor>> {
         let monitor_count = unsafe { self.interface.GetMonitorDevicePathCount()? };
 
@@ -107,7 +101,23 @@ impl DesktopWallpaper {
             })
             .collect()
     }
-    */
+}
+
+#[cfg(test)]
+mod test_monitors {
+    #![cfg(not(feature = "winreg"))]
+    use super::DesktopWallpaper;
+
+    #[test]
+    fn list_monitors() {
+        let desktop = DesktopWallpaper::new().unwrap();
+        let monitors = desktop.get_monitors().unwrap();
+        assert!(monitors.len() > 0);
+        for monitor in monitors {
+            println!("{monitor:#?}");
+        }
+        drop(desktop);
+    }
 }
 
 impl DesktopClient for DesktopWallpaper {
@@ -259,6 +269,25 @@ impl Drop for DesktopWallpaper {
                 CoFreeUnusedLibraries();
                 CoUninitialize();
             }
+        }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use std::path::PathBuf;
+
+    use super::{DesktopClient, DesktopWallpaper};
+
+    #[test]
+    fn get_wallpaper() {
+        let client = DesktopWallpaper::new().unwrap();
+        let path = client.get_wallpaper().unwrap();
+        drop(client);
+        let p = PathBuf::from(&path);
+        println!("{p:?}");
+        if path.len() > 0 {
+            assert!(p.exists());
         }
     }
 }

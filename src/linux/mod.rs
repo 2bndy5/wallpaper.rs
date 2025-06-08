@@ -20,10 +20,9 @@ impl DesktopWallpaper {
         })
     }
 }
+
 impl Drop for DesktopWallpaper {
-    fn drop(&mut self) {
-        drop(self.distro_flavor)
-    }
+    fn drop(&mut self) {}
 }
 
 impl DesktopClient for DesktopWallpaper {
