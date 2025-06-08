@@ -42,11 +42,8 @@ pub use macos::*;
 #[cfg(windows)]
 mod windows;
 
-#[cfg(feature = "winreg")]
-pub use windows::winreg::*;
-
-#[cfg(feature = "winrs")]
-pub use windows::win_rs::*;
+#[cfg(windows)]
+pub use windows::*;
 
 // unsupported
 #[cfg(not(any(unix, windows)))]

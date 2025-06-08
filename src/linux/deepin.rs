@@ -1,5 +1,5 @@
 use super::parse_dconf;
-use crate::{get_stdout, run};
+use crate::{run, Mode, Result};
 
 pub fn get() -> Result<String> {
     parse_dconf(
