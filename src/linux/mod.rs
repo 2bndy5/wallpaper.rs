@@ -1,39 +1,115 @@
+mod deepin;
 mod gnome;
 mod kde;
 mod lxde;
+mod mate;
+mod x_cinnamon;
 pub(crate) mod xfce;
 
-use crate::{get_stdout, run, Error, Mode, Result};
+use crate::{get_stdout, run, DesktopClient, Error, Mode, Result};
 use std::{env, path::Path, process::Command};
 
-/// Returns the wallpaper of the current desktop.
-pub fn get() -> Result<String> {
-    let desktop = env::var("XDG_CURRENT_DESKTOP").unwrap_or_default();
+pub struct DesktopWallpaper {
+    distro_flavor: String,
+}
 
-    if gnome::is_compliant(&desktop) {
-        return gnome::get();
+impl DesktopWallpaper {
+    pub fn new() -> Self {
+        Self {
+            distro_flavor: env::var("XDG_CURRENT_DESKTOP").unwrap_or_default(),
+        }
+    }
+}
+
+pub struct Monitor(usize);
+
+impl From<usize> for Monitor {
+    fn from(value: usize) -> Self {
+        Self(value)
+    }
+}
+
+impl DesktopClient for DesktopWallpaper {
+    fn set_wallpaper<M>(&mut self, monitor: M, path: &str, mode: Mode) -> Result<()>
+    where
+        M: Into<Monitor>,
+    {
+        let _ = monitor;
+        let path = PathBuf::from(path);
+
+        if gnome::is_compliant(&self.distro_flavor) {
+            gnome::set_mode(mode)?;
+            return gnome::set(&path);
+        }
+
+        match self.distro_flavor.as_str() {
+            "KDE" => {
+                kde::set_mode(mode)?;
+                kde::set(&path)
+            }
+            "X-Cinnamon" => {
+                x_cinnamon::set_mode(mode)?;
+                x_cinnamon::set(&path)
+            }
+            "MATE" => {
+                mate::set_mode(mode)?;
+                mate::set(&path)
+            }
+            "XFCE" => {
+                xfce::set_mode(mode)?;
+                xfce::set(path)
+            }
+            "LXDE" => {
+                lxde::set_mode(mode)?;
+                lxde::set(path)
+            }
+            "Deepin" => {
+                deepin::set_mode(mode)?;
+                deepin::set(&path)
+            }
+            _ => {
+                // unable to set mode because feature is not supportedon cirrent desktop.
+                // just try to set the wallpaper instead.
+
+                if let Ok(mut child) = Command::new("swaybg")
+                    .args(["-i", path.as_ref().to_str().ok_or(Error::InvalidPath)?])
+                    .spawn()
+                {
+                    child.stdout = None;
+                    child.stderr = None;
+                    return Ok(());
+                }
+
+                run(
+                    "feh",
+                    &[
+                        "--bg-fill",
+                        path.as_ref().to_str().ok_or(Error::InvalidPath)?,
+                    ],
+                )
+            }
+        }
     }
 
-    match desktop.as_str() {
-        "KDE" => kde::get(),
-        "X-Cinnamon" => parse_dconf(
-            "dconf",
-            &["read", "/org/cinnamon/desktop/background/picture-uri"],
-        ),
-        "MATE" => parse_dconf(
-            "dconf",
-            &["read", "/org/mate/desktop/background/picture-filename"],
-        ),
-        "XFCE" => xfce::get(),
-        "LXDE" => lxde::get(),
-        "Deepin" => parse_dconf(
-            "dconf",
-            &[
-                "read",
-                "/com/deepin/wrap/gnome/desktop/background/picture-uri",
-            ],
-        ),
-        _ => Err(Error::UnsupportedDesktop),
+    fn get_wallpaper<M>(&self, monitor: M) -> Result<String>
+    where
+        M: Into<Monitor>,
+    {
+        let _ = monitor;
+
+        if gnome::is_compliant(self.distro_flavor.as_str) {
+            return gnome::get();
+        }
+
+        match self.distro_flavor.as_str() {
+            "KDE" => kde::get(),
+            "X-Cinnamon" => x_cinnamon::get(),
+            "MATE" => mate::get(),
+            "XFCE" => xfce::get(),
+            "LXDE" => lxde::get(),
+            "Deepin" => deepin::get(),
+            _ => Err(Error::UnsupportedDesktop),
+        }
     }
 }
 
@@ -94,46 +170,6 @@ where
                 ],
             )
         }
-    }
-}
-
-/// Sets the wallpaper style.
-pub fn set_mode(mode: Mode) -> Result<()> {
-    let desktop = env::var("XDG_CURRENT_DESKTOP").unwrap_or_default();
-
-    if gnome::is_compliant(&desktop) {
-        return gnome::set_mode(mode);
-    }
-
-    match desktop.as_str() {
-        "KDE" => kde::set_mode(mode),
-        "X-Cinnamon" => run(
-            "dconf",
-            &[
-                "write",
-                "/org/cinnamon/desktop/background/picture-options",
-                &mode.get_gnome_string(),
-            ],
-        ),
-        "MATE" => run(
-            "dconf",
-            &[
-                "write",
-                "/org/mate/desktop/background/picture-options",
-                &mode.get_gnome_string(),
-            ],
-        ),
-        "XFCE" => xfce::set_mode(mode),
-        "LXDE" => lxde::set_mode(mode),
-        "Deepin" => run(
-            "dconf",
-            &[
-                "write",
-                "/com/deepin/wrap/gnome/desktop/background/picture-options",
-                &mode.get_gnome_string(),
-            ],
-        ),
-        _ => Err(Error::UnsupportedDesktop),
     }
 }
 

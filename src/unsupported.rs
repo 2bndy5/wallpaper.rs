@@ -12,3 +12,10 @@ pub fn set_from_path(_: &str) -> Result<()> {
 pub fn set_mode(_: Mode) -> Result<()> {
     Err(Error::UnsupportedDesktop)
 }
+pub struct Monitor(usize);
+
+impl From<usize> for Monitor {
+    fn from(value: usize) -> Self {
+        Self(value)
+    }
+}
