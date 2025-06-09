@@ -11,10 +11,6 @@ impl DesktopWallpaper {
     }
 }
 
-impl Drop for DesktopWallpaper {
-    fn drop(&mut self) {}
-}
-
 impl DesktopClient for DesktopWallpaper {
     fn set_wallpaper(&mut self, img_path: &str, mode: Mode) -> Result<()> {
         let _ = mode; // Unable to change with AppleScript.

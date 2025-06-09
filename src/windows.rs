@@ -103,20 +103,18 @@ impl DesktopWallpaper {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, not(feature = "winreg")))]
 mod test_monitors {
-    #![cfg(not(feature = "winreg"))]
     use super::DesktopWallpaper;
 
     #[test]
     fn list_monitors() {
         let desktop = DesktopWallpaper::new().unwrap();
         let monitors = desktop.get_monitors().unwrap();
-        assert!(monitors.len() > 0);
+        assert!(!monitors.is_empty());
         for monitor in monitors {
             println!("{monitor:#?}");
         }
-        drop(desktop);
     }
 }
 
@@ -258,9 +256,9 @@ impl DesktopClient for DesktopWallpaper {
     }
 }
 
+#[cfg(not(feature = "winreg"))]
 impl Drop for DesktopWallpaper {
     fn drop(&mut self) {
-        #[cfg(not(feature = "winreg"))]
         {
             unsafe {
                 ManuallyDrop::drop(&mut self.interface);
@@ -281,10 +279,9 @@ mod test {
     fn get_wallpaper() {
         let client = DesktopWallpaper::new().unwrap();
         let path = client.get_wallpaper().unwrap();
-        drop(client);
         let p = PathBuf::from(&path);
         println!("{p:?}");
-        if path.len() > 0 {
+        if !path.is_empty() {
             assert!(p.exists());
         }
     }
