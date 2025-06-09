@@ -29,7 +29,10 @@ pub struct Monitor {
 impl DesktopWallpaper {
     pub fn new() -> core::Result<Self> {
         let interface: IDesktopWallpaper = unsafe {
-            CoInitialize(None)?;
+            let init = CoInitialize(None);
+            if init.is_err() {
+                return Err(core::Error::from_hresult(init));
+            }
             CoCreateInstance(
                 &windows::Win32::UI::Shell::DesktopWallpaper,
                 None,

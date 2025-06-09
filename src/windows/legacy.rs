@@ -2,7 +2,7 @@ use super::DesktopWallpaper;
 use crate::{Error, Mode, Result};
 use std::{
     ffi::{c_void, OsStr},
-    io, iter, mem,
+    iter, mem,
     os::windows::ffi::OsStrExt,
     path::PathBuf,
 };
@@ -24,23 +24,20 @@ impl DesktopWallpaper {
 pub fn get() -> Result<String> {
     unsafe {
         let buffer: [u16; 260] = mem::zeroed();
-        let successful = SystemParametersInfoW(
+        SystemParametersInfoW(
             SPI_GETDESKWALLPAPER,
             buffer.len() as u32,
             Some(buffer.as_ptr() as *mut c_void),
             SYSTEM_PARAMETERS_INFO_UPDATE_FLAGS(0),
-        ) == true;
+        )
+        .map_err(|e| Error::IOError(e.into()))?;
 
-        if successful {
-            let path = String::from_utf16(&buffer)
-                .map_err(|_| Error::InvalidPath)?
-                // removes trailing zeroes from buffer
-                .trim_end_matches('\x00')
-                .into();
-            Ok(path)
-        } else {
-            Err(io::Error::last_os_error().into())
-        }
+        let path = String::from_utf16(&buffer)
+            .map_err(|_| Error::InvalidPath)?
+            // removes trailing zeroes from buffer
+            .trim_end_matches('\x00')
+            .into();
+        Ok(path)
     }
 }
 
@@ -81,17 +78,12 @@ pub fn set(path: &PathBuf, mode: Mode) -> Result<()> {
             // append null byte
             .chain(iter::once(0))
             .collect::<Vec<u16>>();
-        let successful = SystemParametersInfoW(
+        SystemParametersInfoW(
             SPI_SETDESKWALLPAPER,
             0,
             Some(path.as_ptr() as *mut c_void),
             SPIF_UPDATEINIFILE | SPIF_SENDCHANGE,
-        ) == true;
-
-        if successful {
-            Ok(())
-        } else {
-            Err(io::Error::last_os_error().into())
-        }
+        )
+        .map_err(|e| Error::IOError(e.into()))
     }
 }

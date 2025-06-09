@@ -11,20 +11,17 @@ categories = ["api-bindings"]
 license = "Unlicense"
 
 [dependencies]
-thiserror = "2.0.11"
+thiserror = "2.0.12"
 
 [target.'cfg(unix)'.dependencies]
 enquote = "1.1.0"
 
-[target.'cfg(all(unix, not(target_os = "macos")))'.dependencies]
+[target.'cfg(target_os = "linux")'.dependencies]
 rust-ini = "0.21.1"
 dirs = "6.0.0"
 
 [target.'cfg(windows)'.dependencies]
-windows = { version = "0.48.0", features = [
-    "Win32_Foundation",
-    "Win32_System_Com",
-    "Win32_System_Memory",
+windows = { version = "0.61.1", features = [
     "Win32_UI_Shell",
 ] }
 windows-registry = { version = "0.5.2", optional = true }
@@ -33,6 +30,9 @@ windows-registry = { version = "0.5.2", optional = true }
 winreg = [
     "dep:windows-registry",
     "windows/Win32_UI_WindowsAndMessaging",
-    "windows/Win32_System_Registry",
 ]
-default = []
+winrs = [
+    "windows/Win32_Foundation",
+    "windows/Win32_System_Com",
+]
+default = ["winrs"]
