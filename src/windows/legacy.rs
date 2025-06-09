@@ -1,3 +1,5 @@
+//! Everything related legacy windows behavior (about changing the Windows Registry).
+
 use super::DesktopWallpaper;
 use crate::{Error, Mode, Result};
 use std::{

@@ -12,9 +12,9 @@ impl DesktopWallpaper {
 }
 
 impl DesktopClient for DesktopWallpaper {
-    fn set_wallpaper(&mut self, img_path: &str, mode: Mode) -> Result<()> {
+    fn set_wallpaper(&mut self, path: &str, mode: Mode) -> Result<()> {
         let _ = mode; // Unable to change with AppleScript.
-        let _ = PathBuf::from(img_path)
+        let _ = PathBuf::from(path)
             .canonicalize()
             .map_err(|_| Error::InvalidPath)?;
 
@@ -24,7 +24,7 @@ impl DesktopClient for DesktopWallpaper {
                 "-e",
                 format!(
                     r#"tell application "System Events" to tell every desktop to set picture to {}"#,
-                    enquote::enquote('"', img_path),
+                    enquote::enquote('"', path),
                 )
                 .as_str(),
             ],

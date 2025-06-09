@@ -1,6 +1,3 @@
-/// Most of this was copied and adjusted from https://github.com/sindresorhus/windows-wallpaper.git.
-/// Anything related to the `winreg` feature was ported from legacy behavior (about changing the Windows Registry).
-
 #[cfg(feature = "winreg")]
 mod legacy;
 #[cfg(not(feature = "winreg"))]

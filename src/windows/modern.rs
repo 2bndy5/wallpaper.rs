@@ -1,3 +1,6 @@
+//! Most of this was copied and adjusted from https://github.com/sindresorhus/windows-wallpaper.git.
+//! Basically, this is everything related to using the Windows SDK (instead of Windows Registry).
+
 use super::DesktopWallpaper;
 use crate::{Error, Mode, Result};
 use std::{

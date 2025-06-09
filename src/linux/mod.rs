@@ -58,16 +58,14 @@ impl DesktopClient for DesktopWallpaper {
                 deepin::set(path)
             }
             _ => {
-                // unable to set mode because feature is not supportedon cirrent desktop.
-                // just try to set the wallpaper instead.
+                // unable to set mode because feature is not supported on current desktop.
+                // just try to set the wallpaper instead with `swaybg`;
+                // fallback to `feh` if `swaybg` somehow fails.
 
-                if let Ok(mut child) = Command::new("swaybg").args(["-i", path]).spawn() {
-                    child.stdout = None;
-                    child.stderr = None;
-                    return Ok(());
+                if Command::new("swaybg").args(["-i", path]).spawn().is_err() {
+                    return run("feh", &["--bg-fill", path]);
                 }
-
-                run("feh", &["--bg-fill", path])
+                Ok(())
             }
         }
     }
