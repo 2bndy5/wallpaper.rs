@@ -175,11 +175,9 @@ impl DesktopClient for DesktopWallpaper {
     }
 
     fn set_wallpaper(&mut self, path: &str, mode: Mode) -> Result<()> {
-        let path = match PathBuf::from(path).canonicalize() {
-            Ok(p) => p,
-            // Could not get the canonical form of the path.
-            Err(_) => return Err(Error::InvalidPath),
-        };
+        let path = PathBuf::from(path)
+            .canonicalize()
+            .map_err(|_| Error::InvalidPath)?;
 
         #[cfg(feature = "winreg")]
         {

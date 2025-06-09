@@ -7,7 +7,7 @@ mod x_cinnamon;
 pub(crate) mod xfce;
 
 use crate::{get_stdout, run, DesktopClient, Error, Mode, Result};
-use std::{env, process::Command};
+use std::{env, path::PathBuf, process::Command};
 
 pub struct DesktopWallpaper {
     distro_flavor: String,
@@ -27,6 +27,10 @@ impl Drop for DesktopWallpaper {
 
 impl DesktopClient for DesktopWallpaper {
     fn set_wallpaper(&mut self, path: &str, mode: Mode) -> Result<()> {
+        let _ = PathBuf::from(path)
+            .canonicalize()
+            .map_err(|_| Error::InvalidPath)?;
+
         if gnome::is_compliant(&self.distro_flavor) {
             gnome::set_mode(mode)?;
             return gnome::set(path);

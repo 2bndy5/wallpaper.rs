@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use crate::DesktopClient;
 use crate::{error::Error, get_stdout, run, Mode, Result};
 
@@ -14,8 +16,11 @@ impl Drop for DesktopWallpaper {
 }
 
 impl DesktopClient for DesktopWallpaper {
-    fn set_wallpaper(&mut self, path: &str, mode: Mode) -> Result<()> {
+    fn set_wallpaper(&mut self, img_path: &str, mode: Mode) -> Result<()> {
         let _ = mode; // Unable to change with AppleScript.
+        let _ = PathBuf::from(img_path)
+            .canonicalize()
+            .map_err(|_| Error::InvalidPath)?;
 
         run(
             "osascript",
@@ -23,7 +28,7 @@ impl DesktopClient for DesktopWallpaper {
                 "-e",
                 format!(
                     r#"tell application "System Events" to tell every desktop to set picture to {}"#,
-                    enquote::enquote('"', path),
+                    enquote::enquote('"', img_path),
                 )
                 .as_str(),
             ],
