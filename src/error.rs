@@ -4,11 +4,11 @@ use thiserror::Error;
 #[derive(Debug, Error)]
 #[non_exhaustive]
 pub enum Error {
-    #[cfg(any(unix, all(windows, feature = "winreg")))]
+    #[cfg(unix)]
     #[error("I/O Error: {0}")]
     IOError(#[from] std::io::Error),
 
-    #[cfg(all(windows, not(feature = "winreg")))]
+    #[cfg(windows)]
     #[error("Windows SDK error: {0}")]
     WindowsSdk(#[from] windows::core::Error),
 

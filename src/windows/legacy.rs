@@ -30,7 +30,7 @@ pub fn get() -> Result<String> {
             Some(buffer.as_ptr() as *mut c_void),
             SYSTEM_PARAMETERS_INFO_UPDATE_FLAGS(0),
         )
-        .map_err(|e| Error::IOError(e.into()))?;
+        .map_err(|e| windows::core::Error::from_hresult(e.into()))?;
 
         let path = String::from_utf16(&buffer)
             .map_err(|_| Error::InvalidPath)?
@@ -54,7 +54,7 @@ pub fn set(path: &PathBuf, mode: Mode) -> Result<()> {
         }
         .to_string(),
     )
-    .map_err(|e| Error::IOError(e.into()))?;
+    .map_err(|e| windows::core::Error::from_hresult(e.into()))?;
 
     // copied from https://searchfox.org/mozilla-central/rev/5e955a47c4af398e2a859b34056017764e7a2252/browser/components/shell/nsWindowsShellService.cpp#493
     hkcu.set_string(
@@ -69,7 +69,7 @@ pub fn set(path: &PathBuf, mode: Mode) -> Result<()> {
         }
         .to_string(),
     )
-    .map_err(|e| Error::IOError(e.into()))?;
+    .map_err(|e| windows::core::Error::from_hresult(e.into()))?;
 
     // set wallpaper
     unsafe {
@@ -84,6 +84,7 @@ pub fn set(path: &PathBuf, mode: Mode) -> Result<()> {
             Some(path.as_ptr() as *mut c_void),
             SPIF_UPDATEINIFILE | SPIF_SENDCHANGE,
         )
-        .map_err(|e| Error::IOError(e.into()))
+        .map_err(|e| windows::core::Error::from_hresult(e.into()))?;
     }
+    Ok(())
 }
