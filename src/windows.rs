@@ -231,22 +231,33 @@ impl DesktopClient for DesktopWallpaper {
         }
         #[cfg(not(feature = "winreg"))]
         {
-            let monitor_index = unsafe {
-                OsString::from_wide(
-                    self.interface
-                        .GetMonitorDevicePathAt(0)
-                        .map_err(|e| Error::IOError(e.into()))?
-                        .as_wide(),
-                )
-            };
-            unsafe {
+            // set wallpaper for every monitor
+            let monitor_count = unsafe {
                 self.interface
-                    .SetWallpaper(
-                        &HSTRING::from(&monitor_index),
-                        &HSTRING::from(path.as_os_str()),
+                    .GetMonitorDevicePathCount()
+                    .map_err(|e| Error::IOError(e.into()))?
+            };
+            for i in 0..monitor_count {
+                let monitor_index = unsafe {
+                    OsString::from_wide(
+                        self.interface
+                            .GetMonitorDevicePathAt(i)
+                            .map_err(|e| Error::IOError(e.into()))?
+                            .as_wide(),
                     )
-                    .map_err(|e| Error::IOError(e.into()))?;
+                };
+                unsafe {
+                    self.interface
+                        .SetWallpaper(
+                            &HSTRING::from(&monitor_index),
+                            &HSTRING::from(path.as_os_str()),
+                        )
+                        .map_err(|e| Error::IOError(e.into()))?;
+                }
+            }
 
+            // set wallpaper mode
+            unsafe {
                 self.interface
                     .SetPosition(mode.into())
                     .map_err(|e| Error::IOError(e.into()))?;
