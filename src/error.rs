@@ -1,33 +1,41 @@
-use std::{io, string::FromUtf8Error};
+use std::string::FromUtf8Error;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
 #[non_exhaustive]
 pub enum Error {
+    #[cfg(any(unix, all(windows, feature = "winreg")))]
     #[error("I/O Error: {0}")]
-    IOError(#[from] io::Error),
+    IOError(#[from] std::io::Error),
+
+    #[cfg(all(windows, not(feature = "winreg")))]
+    #[error("Windows SDK error: {0}")]
+    WindowsSdk(#[from] windows::core::Error),
 
     #[error("Invalid UTF-8: {0}")]
     InvalidUtf8(#[from] FromUtf8Error),
 
     #[error("Invalid INI: {0}")]
-    #[cfg(all(unix, not(target_os = "macos")))]
+    #[cfg(target_os = "linux")]
     InvalidIni(#[from] ini::Error),
 
     #[error("Enquote error: {0}")]
     #[cfg(unix)]
     Enquote(#[from] enquote::Error),
 
+    #[cfg(unix)]
     #[error("{command} exited with status code {code}")]
     CommandFailed { command: String, code: i32 },
 
+    #[cfg(target_os = "linux")]
     #[error("Could not find config directory")]
     NoConfigDir,
 
+    #[cfg(target_os = "linux")]
     #[error("No {0} image found")]
     NoImage(&'static str),
 
-    #[cfg(all(unix, not(target_os = "macos")))]
+    #[cfg(target_os = "linux")]
     #[error("No desktops found")]
     XfceNoDesktops,
 
@@ -36,12 +44,4 @@ pub enum Error {
 
     #[error("Invalid path")]
     InvalidPath,
-
-    #[error("Cannot set the wallpaper mode on MacOS")]
-    #[cfg(target_os = "macos")]
-    MacOsUnsupportedMode,
-
-    #[cfg(windows)]
-    #[error("Windows SDK error")]
-    WindowsSdk(#[from] windows::core::Error),
 }
