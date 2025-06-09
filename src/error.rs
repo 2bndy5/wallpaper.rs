@@ -40,4 +40,8 @@ pub enum Error {
     #[error("Cannot set the wallpaper mode on MacOS")]
     #[cfg(target_os = "macos")]
     MacOsUnsupportedMode,
+
+    #[cfg(windows)]
+    #[error("Windows SDK error")]
+    WindowsSdk(#[from] windows::core::Error),
 }

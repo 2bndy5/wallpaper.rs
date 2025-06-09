@@ -55,8 +55,7 @@ fn run(command: &str, args: &[&str]) -> Result<()> {
 }
 
 pub trait DesktopClient {
-    /// Sets the wallpaper from a file.
-    /// Sets the wallpaper style.
+    /// Sets the wallpaper from a file `path` with the given [`Mode`].
     fn set_wallpaper(&mut self, path: &str, mode: Mode) -> Result<()> {
         let _ = path;
         let _ = mode;

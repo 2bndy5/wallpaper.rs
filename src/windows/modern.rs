@@ -98,28 +98,16 @@ pub fn get(interface: &ManuallyDrop<IDesktopWallpaper>, monitor: Option<u32>) ->
     let monitor = match monitor {
         None => 0,
         Some(m) => {
-            let max_monitor = unsafe {
-                interface
-                    .GetMonitorDevicePathCount()
-                    .map_err(|e| Error::IOError(e.into()))?
-            };
+            let max_monitor = unsafe { interface.GetMonitorDevicePathCount()? };
             m.min(max_monitor - 1)
         }
     };
-    let monitor_index = unsafe {
-        OsString::from_wide(
-            interface
-                .GetMonitorDevicePathAt(monitor)
-                .map_err(|e| Error::IOError(e.into()))?
-                .as_wide(),
-        )
-    };
+    let monitor_index =
+        unsafe { OsString::from_wide(interface.GetMonitorDevicePathAt(monitor)?.as_wide()) };
     let wallpaper: PWSTR = unsafe {
-        interface
-            .GetWallpaper(PCWSTR(
-                monitor_index.encode_wide().collect::<Vec<u16>>().as_ptr(),
-            ))
-            .map_err(|e| Error::IOError(std::io::Error::from_raw_os_error(e.code().0)))?
+        interface.GetWallpaper(PCWSTR(
+            monitor_index.encode_wide().collect::<Vec<u16>>().as_ptr(),
+        ))?
     };
 
     let wallpaper_string = unsafe { OsString::from_wide(wallpaper.as_wide()) };
@@ -134,35 +122,21 @@ pub fn get(interface: &ManuallyDrop<IDesktopWallpaper>, monitor: Option<u32>) ->
 
 pub fn set(interface: &ManuallyDrop<IDesktopWallpaper>, path: &Path, mode: Mode) -> Result<()> {
     // set wallpaper for every monitor
-    let monitor_count = unsafe {
-        interface
-            .GetMonitorDevicePathCount()
-            .map_err(|e| Error::IOError(e.into()))?
-    };
+    let monitor_count = unsafe { interface.GetMonitorDevicePathCount()? };
     for i in 0..monitor_count {
-        let monitor_index = unsafe {
-            OsString::from_wide(
-                interface
-                    .GetMonitorDevicePathAt(i)
-                    .map_err(|e| Error::IOError(e.into()))?
-                    .as_wide(),
-            )
-        };
+        let monitor_index =
+            unsafe { OsString::from_wide(interface.GetMonitorDevicePathAt(i)?.as_wide()) };
         unsafe {
-            interface
-                .SetWallpaper(
-                    &HSTRING::from(&monitor_index),
-                    &HSTRING::from(path.as_os_str()),
-                )
-                .map_err(|e| Error::IOError(e.into()))?;
+            interface.SetWallpaper(
+                &HSTRING::from(&monitor_index),
+                &HSTRING::from(path.as_os_str()),
+            )?;
         }
     }
 
     // set wallpaper mode
     unsafe {
-        interface
-            .SetPosition(mode.into())
-            .map_err(|e| Error::IOError(e.into()))?;
+        interface.SetPosition(mode.into())?;
     }
     Ok(())
 }
