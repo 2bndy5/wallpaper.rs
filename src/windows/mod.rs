@@ -3,6 +3,11 @@ mod legacy;
 #[cfg(not(feature = "winreg"))]
 mod modern;
 
+#[cfg(all(not(feature = "winreg"), not(feature = "winrs")))]
+compile_error!(
+    "Need to select a windows `wallpaper` implementation: `winrs` (default) or `winreg` (legacy)"
+);
+
 #[cfg(not(feature = "winreg"))]
 use std::mem::ManuallyDrop;
 use std::path::PathBuf;
