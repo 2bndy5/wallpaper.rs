@@ -73,6 +73,36 @@ impl DesktopWallpaper {
             })
             .collect()
     }
+
+    pub fn set_with_monitors(
+        &self,
+        path: &Path,
+        mode: Mode,
+        monitors: Option<&[OsString]>,
+    ) -> Result<()> {
+        let monitor_count = unsafe { self.interface.GetMonitorDevicePathCount()? };
+        for i in 0..monitor_count {
+            let monitor_index =
+                unsafe { OsString::from_wide(self.interface.GetMonitorDevicePathAt(i)?.as_wide()) };
+
+            // if no monitors specified at all or monitor is specified
+            if monitors.is_none_or(|m| m.contains(&monitor_index)) {
+                // set wallpaper for every monitor
+                unsafe {
+                    self.interface.SetWallpaper(
+                        &HSTRING::from(&monitor_index),
+                        &HSTRING::from(path.as_os_str()),
+                    )?;
+                }
+            }
+        }
+
+        // set wallpaper mode
+        unsafe {
+            self.interface.SetPosition(mode.into())?;
+        }
+        Ok(())
+    }
 }
 
 impl Drop for DesktopWallpaper {
@@ -124,40 +154,6 @@ pub fn get(interface: &ManuallyDrop<IDesktopWallpaper>, monitor: Option<u32>) ->
         return Ok(path.to_string_lossy().to_string());
     }
     Err(Error::InvalidPath)
-}
-
-pub fn set(interface: &ManuallyDrop<IDesktopWallpaper>, path: &Path, mode: Mode) -> Result<()> {
-    set_with_monitors(interface, path, mode, None)
-}
-
-pub fn set_with_monitors(
-    interface: &ManuallyDrop<IDesktopWallpaper>,
-    path: &Path,
-    mode: Mode,
-    monitors: Option<&[OsString]>,
-) -> Result<()> {
-    let monitor_count = unsafe { interface.GetMonitorDevicePathCount()? };
-    for i in 0..monitor_count {
-        let monitor_index =
-            unsafe { OsString::from_wide(interface.GetMonitorDevicePathAt(i)?.as_wide()) };
-
-        // if no monitors specified at all or monitor is specified
-        if monitors.is_none_or(|m| m.contains(&monitor_index)) {
-            // set wallpaper for every monitor
-            unsafe {
-                interface.SetWallpaper(
-                    &HSTRING::from(&monitor_index),
-                    &HSTRING::from(path.as_os_str()),
-                )?;
-            }
-        }
-    }
-
-    // set wallpaper mode
-    unsafe {
-        interface.SetPosition(mode.into())?;
-    }
-    Ok(())
 }
 
 #[cfg(test)]

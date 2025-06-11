@@ -45,7 +45,7 @@ impl DesktopClient for DesktopWallpaper {
         }
         #[cfg(not(feature = "winreg"))]
         {
-            modern::set(&self.interface, &path, mode)
+            self.set_with_monitors(&path, mode, None)
         }
     }
 }
