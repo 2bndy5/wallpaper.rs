@@ -1,6 +1,6 @@
 [package]
 name = "wallpaper"
-version = "4.0.0"
+version = "5.0.0"
 edition = "2018"
 authors = ["reujab <reujab@gmail.com>"]
 description = "Gets and sets the desktop wallpaper/background."
@@ -11,15 +11,28 @@ categories = ["api-bindings"]
 license = "Unlicense"
 
 [dependencies]
-thiserror = "2.0.11"
+thiserror = "2.0.12"
 
 [target.'cfg(unix)'.dependencies]
 enquote = "1.1.0"
 
-[target.'cfg(all(unix, not(target_os = "macos")))'.dependencies]
+[target.'cfg(target_os = "linux")'.dependencies]
 rust-ini = "0.21.1"
 dirs = "6.0.0"
 
 [target.'cfg(windows)'.dependencies]
-winapi = { version = "0.3.9", features = ["winuser"] }
-winreg = "0.55.0"
+windows = { version = "0.61.1", features = [
+    "Win32_UI_Shell",
+] }
+windows-registry = { version = "0.5.2", optional = true }
+
+[features]
+winreg = [
+    "dep:windows-registry",
+    "windows/Win32_UI_WindowsAndMessaging",
+]
+winrs = [
+    "windows/Win32_Foundation",
+    "windows/Win32_System_Com",
+]
+default = ["winrs"]

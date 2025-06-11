@@ -1,28 +1,4 @@
-//! This library gets and sets the desktop wallpaper/background.
-//!
-//! The supported desktops are:
-//! * Windows
-//! * macOS
-//! * GNOME
-//! * KDE
-//! * Cinnamon
-//! * Unity
-//! * Budgie
-//! * XFCE
-//! * LXDE
-//! * MATE
-//! * Deepin
-//! * Most Wayland compositors (set only, requires swaybg)
-//! * i3 (set only, requires feh)
-//!
-//! # Example
-//! ```no_run
-//! println!("{:?}", wallpaper::get());
-//! wallpaper::set_from_path("/usr/share/backgrounds/gnome/adwaita-day.png").unwrap();
-//! wallpaper::set_mode(wallpaper::Mode::Crop).unwrap();
-//! println!("{:?}", wallpaper::get());
-//! ```
-
+#![doc = include_str!("../readme.md")]
 mod error;
 pub use error::Error;
 
@@ -45,16 +21,9 @@ mod windows;
 #[cfg(windows)]
 pub use windows::*;
 
-// unsupported
-#[cfg(not(any(unix, windows)))]
-mod unsupported;
-
-#[cfg(not(any(unix, windows)))]
-pub use unsupported::*;
-
 type Result<T, E = Error> = std::result::Result<T, E>;
 
-#[derive(Clone, Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum Mode {
     Center,
     Crop,
@@ -83,4 +52,17 @@ fn get_stdout(command: &str, args: &[&str]) -> Result<String> {
 #[inline]
 fn run(command: &str, args: &[&str]) -> Result<()> {
     get_stdout(command, args).map(|_| ())
+}
+
+pub trait DesktopClient {
+    /// Sets the wallpaper from a file `path` with the given [`Mode`].
+    fn set_wallpaper(&mut self, path: &str, mode: Mode) -> Result<()> {
+        let _ = path;
+        let _ = mode;
+        Err(Error::UnsupportedDesktop)
+    }
+    /// Returns the current wallpaper.
+    fn get_wallpaper(&self) -> Result<String> {
+        Err(Error::UnsupportedDesktop)
+    }
 }

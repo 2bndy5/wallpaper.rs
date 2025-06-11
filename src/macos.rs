@@ -1,32 +1,43 @@
+use std::path::PathBuf;
+
+use crate::DesktopClient;
 use crate::{error::Error, get_stdout, run, Mode, Result};
 
-/// Returns the current wallpaper.
-pub fn get() -> Result<String> {
-    get_stdout(
-        "osascript",
-        &[
-            "-e",
-            r#"tell application "Finder" to get POSIX path of (get desktop picture as alias)"#,
-        ],
-    )
+pub struct DesktopWallpaper;
+
+impl DesktopWallpaper {
+    pub fn new() -> Result<Self> {
+        Ok(Self {})
+    }
 }
 
-// Sets the wallpaper from a file.
-pub fn set_from_path(path: &str) -> Result<()> {
-    run(
-        "osascript",
-        &[
-            "-e",
-            format!(
-                r#"tell application "System Events" to tell every desktop to set picture to {}"#,
-                enquote::enquote('"', path),
-            )
-            .as_str(),
-        ],
-    )
-}
+impl DesktopClient for DesktopWallpaper {
+    fn set_wallpaper(&mut self, path: &str, mode: Mode) -> Result<()> {
+        let _ = mode; // Unable to change with AppleScript.
+        let _ = PathBuf::from(path)
+            .canonicalize()
+            .map_err(|_| Error::InvalidPath)?;
 
-/// No-op. Unable to change with AppleScript.
-pub fn set_mode(_: Mode) -> Result<()> {
-    Err(Error::MacOsUnsupportedMode)
+        run(
+            "osascript",
+            &[
+                "-e",
+                format!(
+                    r#"tell application "System Events" to tell every desktop to set picture to {}"#,
+                    enquote::enquote('"', path),
+                )
+                .as_str(),
+            ],
+        )
+    }
+
+    fn get_wallpaper(&self) -> Result<String> {
+        get_stdout(
+            "osascript",
+            &[
+                "-e",
+                r#"tell application "Finder" to get POSIX path of (get desktop picture as alias)"#,
+            ],
+        )
+    }
 }
