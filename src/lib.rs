@@ -56,7 +56,7 @@ fn run(command: &str, args: &[&str]) -> Result<()> {
 
 pub trait DesktopClient {
     /// Sets the wallpaper from a file `path` with the given [`Mode`].
-    fn set_wallpaper(&mut self, path: &str, mode: Mode) -> Result<()> {
+    fn set_wallpaper(&mut self, path: &str, mode: Option<Mode>) -> Result<()> {
         let _ = path;
         let _ = mode;
         Err(Error::UnsupportedDesktop)

@@ -77,7 +77,7 @@ impl DesktopWallpaper {
     pub fn set_with_monitors(
         &self,
         path: &Path,
-        mode: Mode,
+        mode: Option<Mode>,
         monitors: Option<&[OsString]>,
     ) -> Result<()> {
         let monitor_count = unsafe { self.interface.GetMonitorDevicePathCount()? };
@@ -98,8 +98,10 @@ impl DesktopWallpaper {
         }
 
         // set wallpaper mode
-        unsafe {
-            self.interface.SetPosition(mode.into())?;
+        if let Some(mode) = mode {
+            unsafe {
+                self.interface.SetPosition(mode.into())?;
+            }
         }
         Ok(())
     }

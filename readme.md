@@ -41,7 +41,7 @@ assert!(
     client.set_wallpaper(
         "/path/to/picture.png",
         // Also sets the wallpaper mode (crop, center, fit, span, etc).
-        Mode::Stretch
+        Some(Mode::Stretch)
     )
     .is_err_and(|e| matches!(e, wallpaper::Error::InvalidPath))
 );

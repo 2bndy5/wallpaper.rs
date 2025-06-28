@@ -43,33 +43,35 @@ pub fn get() -> Result<String> {
     }
 }
 
-pub fn set(path: &Path, mode: Mode) -> Result<()> {
+pub fn set(path: &Path, mode: Option<Mode>) -> Result<()> {
     // set wallpaper mode
     let hkcu = CURRENT_USER
         .create("Control Panel\\Desktop")
         .map_err(|e| WinError::from_hresult(e.into()))?;
-    hkcu.set_string(
-        "TileWallpaper",
-        match mode {
-            Mode::Tile => "1",
-            _ => "0",
-        },
-    )
-    .map_err(|e| WinError::from_hresult(e.into()))?;
+    if let Some(mode) = mode {
+        hkcu.set_string(
+            "TileWallpaper",
+            match mode {
+                Mode::Tile => "1",
+                _ => "0",
+            },
+        )
+        .map_err(|e| WinError::from_hresult(e.into()))?;
 
-    // copied from https://searchfox.org/mozilla-central/rev/5e955a47c4af398e2a859b34056017764e7a2252/browser/components/shell/nsWindowsShellService.cpp#493
-    hkcu.set_string(
-        "WallpaperStyle",
-        match mode {
-            // does not work with integers
-            Mode::Center | Mode::Tile => "0",
-            Mode::Fit => "6",
-            Mode::Span => "22",
-            Mode::Stretch => "2",
-            Mode::Crop => "10",
-        },
-    )
-    .map_err(|e| WinError::from_hresult(e.into()))?;
+        // copied from https://searchfox.org/mozilla-central/rev/5e955a47c4af398e2a859b34056017764e7a2252/browser/components/shell/nsWindowsShellService.cpp#493
+        hkcu.set_string(
+            "WallpaperStyle",
+            match mode {
+                // does not work with integers
+                Mode::Center | Mode::Tile => "0",
+                Mode::Fit => "6",
+                Mode::Span => "22",
+                Mode::Stretch => "2",
+                Mode::Crop => "10",
+            },
+        )
+        .map_err(|e| WinError::from_hresult(e.into()))?;
+    }
 
     // set wallpaper
     unsafe {

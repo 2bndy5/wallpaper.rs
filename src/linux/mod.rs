@@ -22,39 +22,53 @@ impl DesktopWallpaper {
 }
 
 impl DesktopClient for DesktopWallpaper {
-    fn set_wallpaper(&mut self, path: &str, mode: Mode) -> Result<()> {
+    fn set_wallpaper(&mut self, path: &str, mode: Option<Mode>) -> Result<()> {
         let _ = PathBuf::from(path)
             .canonicalize()
             .map_err(|_| Error::InvalidPath)?;
 
         if gnome::is_compliant(&self.distro_flavor) {
-            gnome::set_mode(mode)?;
+            if let Some(mode) = mode {
+                gnome::set_mode(mode)?;
+            }
             return gnome::set(path);
         }
 
         match self.distro_flavor.as_str() {
             "KDE" => {
-                kde::set_mode(mode)?;
+                if let Some(mode) = mode {
+                    kde::set_mode(mode)?;
+                }
                 kde::set(path)
             }
             "X-Cinnamon" => {
-                x_cinnamon::set_mode(mode)?;
+                if let Some(mode) = mode {
+                    x_cinnamon::set_mode(mode)?;
+                }
                 x_cinnamon::set(path)
             }
             "MATE" => {
-                mate::set_mode(mode)?;
+                if let Some(mode) = mode {
+                    mate::set_mode(mode)?;
+                }
                 mate::set(path)
             }
             "XFCE" => {
-                xfce::set_mode(mode)?;
+                if let Some(mode) = mode {
+                    xfce::set_mode(mode)?;
+                }
                 xfce::set(path)
             }
             "LXDE" => {
-                lxde::set_mode(mode)?;
+                if let Some(mode) = mode {
+                    lxde::set_mode(mode)?;
+                }
                 lxde::set(path)
             }
             "Deepin" => {
-                deepin::set_mode(mode)?;
+                if let Some(mode) = mode {
+                    deepin::set_mode(mode)?;
+                }
                 deepin::set(path)
             }
             _ => {

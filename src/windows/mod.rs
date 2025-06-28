@@ -34,7 +34,7 @@ impl DesktopClient for DesktopWallpaper {
         }
     }
 
-    fn set_wallpaper(&mut self, path: &str, mode: Mode) -> Result<()> {
+    fn set_wallpaper(&mut self, path: &str, mode: Option<Mode>) -> Result<()> {
         let path = PathBuf::from(path)
             .canonicalize()
             .map_err(|_| Error::InvalidPath)?;
