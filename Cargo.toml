@@ -11,7 +11,7 @@ categories = ["api-bindings"]
 license = "Unlicense"
 
 [dependencies]
-thiserror = "2.0.12"
+thiserror = "2.0.14"
 
 [target.'cfg(unix)'.dependencies]
 enquote = "1.1.0"
