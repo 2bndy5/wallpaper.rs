@@ -11,7 +11,7 @@ categories = ["api-bindings"]
 license = "Unlicense"
 
 [dependencies]
-thiserror = "2.0.16"
+thiserror = "2.0.17"
 
 [target.'cfg(unix)'.dependencies]
 enquote = "1.1.0"
@@ -21,10 +21,10 @@ rust-ini = "0.21.3"
 dirs = "6.0.0"
 
 [target.'cfg(windows)'.dependencies]
-windows = { version = "0.62.0", features = [
+windows = { version = "0.62.2", features = [
     "Win32_UI_Shell",
 ] }
-windows-registry = { version = "0.6.0", optional = true }
+windows-registry = { version = "0.6.1", optional = true }
 
 [features]
 winreg = [
